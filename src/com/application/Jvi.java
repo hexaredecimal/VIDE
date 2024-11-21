@@ -25,7 +25,7 @@
  * 
  * Contributor(s): Ernie Rael <err@raelity.com>
  */
-package com.raelity.jvi.cmd;
+package application;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.event.ActionEvent;
@@ -36,6 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
 import com.raelity.jvi.swing.*;
 import com.raelity.jvi.*;
+import com.raelity.jvi.cmd.JviFrame;
 
 public class Jvi {
 
