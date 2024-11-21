@@ -1,0 +1,160 @@
+<body>
+<p>
+This is the main package of the jVi editor; it contains the primary editing
+engine.
+</p>
+<p>
+<b>If you want to work on the source in this package, you should pick up
+a copy of the vim source, v5.4, from the 
+<a href="http://www.vim.org" target="_top">
+vim website</a>.</b> This applies especially to
+{@link com.raelity.jvi.Normal},
+{@link com.raelity.jvi.Edit},
+{@link com.raelity.jvi.ColonCommands}
+and {@link com.raelity.jvi.Misc}.
+The class file 
+{@link com.raelity.jvi.Misc}
+contains functions from several vim C files, including
+misc1.c, misc2.c, ops.c, ui.c, screen.c, undo.c, charset.c,
+ex_getln.c, term.c and window.c.
+Finally there is the class file
+{@link com.raelity.jvi.Util}
+which contains random stuff. It should probably be put
+into Misc.
+</p>
+
+<h3>Embedding and Porting Notes</h3>
+
+<p>
+jVi is embedded in an application by implementing several interfaces
+through which the vi editing engine works on its environment. These
+are tasks such as adding and deleting text, view manipulation and
+file IO. The main editor accesses these various interfaces through
+{@link com.raelity.jvi.ViFactory}.
+A {@link com.raelity.jvi.ViFactory} is implemented that creates
+concrete instantiations of the various interfaces. Access to the
+factory and other capabilities is co-ordinated throug the
+{@link com.raelity.jvi.ViManager}
+class. Take a look at 
+{@link org.jbopentools.editor.jbvi}
+and
+{@link com.raelity.jvi.cmd}
+for examples of jvi embedded in an application.
+</p>
+<p>
+A key interface for embedding jVi is
+{@link com.raelity.jvi.ViTextView}.
+This interface is used to access the display and text.
+There is a default implementation,
+{@link com.raelity.jvi.swing.TextView},
+for swing that works with
+a JEditorPane and Document. If jVi is being embedded
+in a swing application you can probably subclass this
+implementation as a starting point. There are methods
+in this interface, win_*, which provide for the manipulation
+of edit views (windows); they probably should be
+in a separate class.
+</p>
+<p>
+File handling is provided through the
+{@link com.raelity.jvi.ViFS}
+interface. Status and other messages are
+output through the
+{@link com.raelity.jvi.ViStatusDisplay},
+interface.
+</p>
+<p>
+There are two ways in which jVi captures keystrokes, through
+normal mode and through line entry. Line entry is
+for specifying colon commands and search patterns. There is an
+interface,
+{@link com.raelity.jvi.ViCmdEntry},
+through which command mode entry is done.
+There are two implementations of higher level gui objects which
+have ViCmdEntry as part of them,
+{@link com.raelity.jvi.swing.WindowCmdEntry}
+and
+{@link com.raelity.jvi.swing.DefaultCmdEntry}.
+Only WindowCmdEntry should be used for now because it is modal.
+</p>
+
+<h3>Colon Commands</h3>
+
+<p>
+It is pretty simple to add new colon commands. The handler for
+a colon command is an Action.
+Colon command handling is in the class
+{@link com.raelity.jvi.ColonCommands}.
+If a colon command takes no arguments,
+then you can register a
+{@link java.awt.event.ActionListener}
+to handle the command. If the command takes arguments, then you
+register a 
+{@link com.raelity.jvi.ColonCommands.ColonAction}
+to handle the command. A 
+{@link com.raelity.jvi.ColonCommands.ColonEvent}
+is passed to the action that handles a colon command. Through
+this event the arguments to the command can be accessed.
+The command that was used to invoke the action is also available,
+so a single action could handle multiple commands; and there are
+other techniques to achieve this affect.
+</p>
+
+<h3>Normal Mode Command Parsing</h3>
+
+<p>
+Normal mode Vi comands can have up to three chunks: buffer-operator-motion.
+For example: <b>"a3y4&lt;CR&gt;</b> has
+<ul>
+  <li>buffer: "a
+  <li>operator: 3y
+  <li>motion: 4&lt;CR&gt;
+</ul>
+The original vim invokes normal,
+similar in function to jVi's {@link com.raelity.jvi.Normal},
+3 times, one for each chunk. The caller
+had no knowledge of how many chunks there are in a single command,
+it just called normal in a loop. normal kept control,
+calling safe_getc as needed to pick up all the
+characters that make up a chunk, and returned as each chunk was completed.
+Accumulated information was saved in OPARG.
+normal detected when a complete command was ready and then executed it,
+often times in do_pending_op.
+CMDARG has per chunk information, and OPARG is cleared after each
+command.
+</p>
+<p>
+To fit into a java gui environment, we want to be able to handle and parse one
+character at a time as delivered through an action from
+the event thread. This means we have to return
+after each character. So we must maintain a bunch of "where am i" state
+information between each character. The original code is more or less
+intact sourounded by a variety of "what state am i in" conditionals;
+this is messy.  Input characters come in through
+{@link com.raelity.jvi.Normal#processInputChar},
+<br><b>NEEDSWORK:</b>get the char parsing to look like a classic state
+machine this should at least keep it managable.
+</p><p>
+Operator and motion are very similar, syntacticly they are usually like
+<b>[&lt;count&gt;]&lt;char&gt;</b>
+or sometimes more than one char. A motion can also be a search.
+</p>
+
+<h3>Working with Three types of Options</h3>
+
+<p>
+<i>vim/vi</i> have three types of options: global, buffer and window.
+jVi mirrors this structure (finally in 2007 per buffer/document options
+are supported).
+Global options are static and are found in {@link G}. Per file  options
+are in {@link com.raelity.jvi.Buffer} and per window options are in
+{@link com.raelity.jvi.ViTextView}.
+Both <code>Buffer</code> and <code>ViTextView</code> implement
+{@link com.raelity.jvi.ViOptionBag}. <code>ViOptionBag</code> is the
+primary source of information about handling options.
+Multiple views/windows
+of the same document share the <code>Buffer</code> variables;
+for example, if you do ":set sw=8" on a file,
+any open windows into that file all have the same shiftwidth.
+    
+</body>

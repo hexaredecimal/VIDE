@@ -1,0 +1,19 @@
+<body>
+<p>
+jVi is vi-vim editor clone,
+if you are interested in its guts then see the main
+<a href="com/raelity/jvi/package-summary.html#package_description">
+package description</a>.
+The intention is that jVi be embedded in
+various applications, for example IDEs and news/mail readers. To meet this
+goal, jVi is organized to make it easy to plug into an application.
+The package {@link com.raelity.jvi} is the
+primary editing engine. It processes all the vi commands and performs
+text manipullations. It gets access to its environment through a series
+of interfaces. The package {@link com.raelity.jvi.swing} has most of the
+substance of a port of jVi to the swing package. {@link com.raelity.jvi.cmd}
+starts up a JEditorPane with some text and jVi keybindings attached to it.
+This is useful for debugging. With any argument, a second JEditorPane is
+started that reference the same document as the first.
+</p>
+</body>
