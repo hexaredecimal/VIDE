@@ -3,13 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/cmd/LineNumberExample.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/ViManager.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/cmd/Jvi.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/swing/StatusDisplay.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/swing/TextView.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/cmd/JviFrame.java</file>
-            <file>file:/home/hexaredecimal/Probe/Jvim/com/raelity/jvi/Misc.java</file>
+            <file>file:/home/hexaredecimal/NetBeansProjects/Jvim/src/com/raelity/jvi/cmd/JviFrame.java</file>
+            <file>file:/home/hexaredecimal/NetBeansProjects/Jvim/src/com/raelity/jvi/cmd/VideLanguages.java</file>
+            <file>file:/home/hexaredecimal/NetBeansProjects/Jvim/src/com/raelity/jvi/cmd/EditorPanel.java</file>
+            <file>file:/home/hexaredecimal/NetBeansProjects/Jvim/src/com/application/Jvi.java</file>
+            <file>file:/home/hexaredecimal/NetBeansProjects/Jvim/src/com/raelity/jvi/ColonCommands.java</file>
         </group>
     </open-files>
 </project-private>
