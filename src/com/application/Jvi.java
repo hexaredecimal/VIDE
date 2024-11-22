@@ -25,7 +25,7 @@
  * 
  * Contributor(s): Ernie Rael <err@raelity.com>
  */
-package application;
+package com.application;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.event.ActionEvent;
