@@ -1,9 +1,8 @@
 /**
  * Title:        jVi<p>
- * Description:  A VI-VIM clone.
- * Use VIM as a model where applicable.<p>
- * Copyright:    Copyright (c) Ernie Rael<p>
- * Company:      Raelity Engineering<p>
+ * Description: A VI-VIM clone. Use VIM as a model where applicable.<p>
+ * Copyright: Copyright (c) Ernie Rael<p>
+ * Company: Raelity Engineering<p>
  * @author Ernie Rael
  * @version 1.0
  */
@@ -37,53 +36,57 @@ import com.raelity.jvi.ViCursor;
 import com.raelity.jvi.G;
 
 public class StatusDisplay implements ViStatusDisplay {
-  public JLabel generalStatus;
-  public JLabel strokeStatus;
-  public JLabel modeStatus;
 
-  public void displayMode(String mode) {
-    String s = mode + (G.Recording ? "recording" : "");
-    if(s.equals("")) {
-      s = " ";
-    }
-    setText(modeStatus, s);
-  }
+	public JLabel generalStatus;
+	public JLabel strokeStatus;
+	public JLabel modeStatus;
 
-  public void displayCommand(String cmd) {
-    setText(strokeStatus, cmd);
-  }
+	public void displayMode(String mode) {
+		String s = mode + (G.Recording ? "recording" : "");
+		if (s.equals("")) {
+			s = " ";
+		}
+		setText(modeStatus, s);
+	}
 
-  public void displayStatusMessage(String msg) {
-    setText(generalStatus, msg);
-  }
+	public void displayCommand(String cmd) {
+		setText(strokeStatus, cmd);
+	}
 
-  public void displayErrorMessage(String msg) {
-    // NEEDSWORK: make error message red or something
-    setText(generalStatus, msg);
-  }
-  
-  public void clearMessage() {
-    displayStatusMessage("");
-  }
+	public void displayStatusMessage(String msg) {
+		setText(generalStatus, msg);
+	}
 
-  synchronized void setText(JLabel l00, String s00) {
-    if(l00 == generalStatus && s00.equals("")) {
-      s00 = " "; // need this to keep the status bar from colapsing
-    }
-    if(SwingUtilities.isEventDispatchThread()) {
-      l00.setText(s00);
-    } else {
-      final JLabel l01 = l00;
-      final String s01 = s00;
-      SwingUtilities.invokeLater(
-	new Runnable() {
-	  public void run() {
-	    l01.setText(s01);
-	  }});
-    }
-  }
+	public void displayErrorMessage(String msg) {
+		// NEEDSWORK: make error message red or something
+		setText(generalStatus, msg);
+	}
 
-    /** don't need anything special here */
-    public void refresh() {
-    }
+	public void clearMessage() {
+		displayStatusMessage("");
+	}
+
+	synchronized void setText(JLabel l00, String s00) {
+		if (l00 == generalStatus && s00.equals("")) {
+			s00 = " "; // need this to keep the status bar from colapsing
+		}
+		if (SwingUtilities.isEventDispatchThread()) {
+			l00.setText(s00);
+		} else {
+			final JLabel l01 = l00;
+			final String s01 = s00;
+			SwingUtilities.invokeLater(
+				new Runnable() {
+				public void run() {
+					l01.setText(s01);
+				}
+			});
+		}
+	}
+
+	/**
+	 * don't need anything special here
+	 */
+	public void refresh() {
+	}
 }
