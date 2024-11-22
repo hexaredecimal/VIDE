@@ -611,7 +611,25 @@ public class ColonCommands {
     	JviFrame.split(JSplitPane.VERTICAL_SPLIT);
 		}};
 
+  static ActionListener ACTION_explore = new ActionListener() {
+    public void actionPerformed(ActionEvent ev) {
+      ColonEvent cev = (ColonEvent)ev;
+      // NEEDSWORK: win_close: hidden, need_hide....
+			JviFrame.split_root.setDividerLocation(0.2);
+			JviFrame.file_tree.collapseRow(0);
+			JviFrame.file_tree.expandRow(0);
+		}};
 
+	
+  static ActionListener ACTION_toggle_explore = new ActionListener() {
+    public void actionPerformed(ActionEvent ev) {
+      ColonEvent cev = (ColonEvent)ev;
+      // NEEDSWORK: win_close: hidden, need_hide....
+			double loc = JviFrame.split_root.getDividerLocation();
+			loc = (loc != 0) ? 0 : 0.2;
+			JviFrame.split_root.setDividerLocation(loc);
+		}};
+	
   static ActionListener ACTION_only = new ActionListener() {
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
@@ -938,6 +956,8 @@ public class ColonCommands {
 		register("sp", "split", ACTION_split);
 		register("vsp", "vsplit", ACTION_vsplit);
     
+    register("Exp", "Explore", ACTION_explore);
+    register("Tog", "ToggleExplore", ACTION_toggle_explore);
     // register("y", "yank", ACTION_yank);
     
     // register("n", "next", ACTION_next);
