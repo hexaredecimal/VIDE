@@ -29,14 +29,21 @@ package com.raelity.jvi.cmd;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 public class JviFrame extends JFrame {
 
 	JPanel contentPane;
 
 	BorderLayout borderLayout1 = new BorderLayout();
-	JTree file_tree = new JTree();
+	public static JTree file_tree = new JTree();
 	public static JSplitPane split_root = new JSplitPane();
 	public static EditorPanel selected = null;
 
@@ -55,15 +62,179 @@ public class JviFrame extends JFrame {
 		contentPane = (JPanel) this.getContentPane();
 		contentPane.setLayout(borderLayout1);
 		this.setSize(new Dimension(400, 285));
-		this.setTitle("Frame Title");
+		this.setTitle("Vide");
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
-
-		split_root.setLeftComponent(file_tree);
+		
+		split_root.setDividerLocation(0);
+		loadDirectory(System.getProperty("user.dir"));
+		split_root.setLeftComponent(new JScrollPane(file_tree));
 		split_root.setRightComponent(new EditorPanel());
 		split_root.setDividerLocation(0);
 		contentPane.add(split_root);
+
+		this.setJMenuBar(setUpMenuBar());
 	}
+
+	private void loadDirectory(String file) {
+		File fp = new File(file);
+		if (!fp.exists()) {
+			System.err.println("error: " + file + " does not extit");
+			return;
+		}
+
+		if (fp.isFile()) {
+			return;
+		}
+
+		if (fp.isDirectory()) {
+			DefaultTreeModel model = (DefaultTreeModel) file_tree.getModel();
+			DefaultMutableTreeNode top = new DefaultMutableTreeNode(fp.getName());
+			model.setRoot(top);
+			file_tree.setModel(model);
+			createNodes(top, fp);
+		}
+	}
+
+	private JMenuBar setUpMenuBar() {
+		JMenuBar mb = new JMenuBar(); 
+
+		String[] file_menu_items = {
+			"Open", "Split-Open", "OpenTab", "New", "Close", "_", 
+			"Save", "Save As...", "_", "Split Diff With...", "Split Patched By...", "_", 
+			"Print", "_", "Save-Exit", "Exit"
+		};
+		
+		JMenu file = new JMenu("File");
+		mb.add(file);
+		putMenuItems(file, file_menu_items);
+
+		String[] edit_menu_items = {
+			"Undo", "Redo", "Repeat", "_", "Cut", "Copy", "Paste", "Put Before", "Put After",
+			"Select All", "_", "Find", "Find And Replace", "_", "Settings Window", "Startup Settings"
+		};
+		
+		JMenu edit = new JMenu("Edit");
+		mb.add(edit);
+		putMenuItems(edit, edit_menu_items);
+		
+
+		String[] tools_menu_items = {
+			"Jump To This Tag", "Jump Back", "Build Tags File", "_",
+		};
+
+		String[] spelling_menu_items = {
+			"Spelling Check On", "Spelling Check Off", "To Next Error", "To Previous Error",
+			"Suggest Corrections"
+		};
+		
+		String[] folding_menu_items = {
+			"Enable/Disable Folds", "View Cursor Line", "View Cursor Line Only", "Close More Folds", "Close All Folds",
+			"Open More Folds", "Open All Folds"
+		};
+		
+		var tools = getMenuWithItems("Tools", tools_menu_items);
+		mb.add(tools);
+		
+		var spelling = getMenuWithItems("Spelling", spelling_menu_items);
+		tools.add(spelling);
+		
+		var folding = getMenuWithItems("Folding", folding_menu_items);
+		tools.add(folding);
+
+		String[] syntax_menu_items = {
+			"Off", "Manual", "Automatic", "On/Off for this file"
+		};
+
+		var syntax = getMenuWithItems("Syntax", syntax_menu_items, (action) -> {
+			String lang = action.getActionCommand();
+			
+			switch (lang) {
+				case "Off": {
+					selected.getEditor().setSyntaxEditingStyle(VideLanguages.TXT.getHighlight());
+				}
+			}
+		});
+		mb.add(syntax);
+
+		var langs = Stream.of(VideLanguages.values()).map(lang -> lang.toString()).collect(Collectors.toList());
+		Collections.sort(langs, (left, right) -> {
+			return left.compareTo(right);
+		});
+
+		String[] lang_items = new String[langs.size()];
+		for (int i = 0; i < langs.size(); i++) {
+			lang_items[i] = langs.get(i);
+		}
+
+		var languages = getMenuWithItems("Languages", lang_items, (action) -> {
+			String lang = action.getActionCommand();
+			selected.getEditor().setSyntaxEditingStyle(VideLanguages.valueOf(lang).getHighlight());
+		});
+		syntax.add(languages, 0);
+		return mb;
+	}
+
+	private void putMenuItems(JMenu menu, String[] items) {
+		for (String itm: items) {
+			if (itm.equals("_")) {
+				menu.add(new JSeparator());
+				continue;
+			}
+			
+			JMenuItem item = new JMenuItem(itm);
+			menu.add(item);
+		}
+	}
+	
+	private JMenu getMenuWithItems(String name, String[] items) {
+		JMenu menu = new JMenu(name);
+		for (String itm: items) {
+			if (itm.equals("_")) {
+				menu.add(new JSeparator());
+				continue;
+			}
+			
+			JMenuItem item = new JMenuItem(itm);
+			menu.add(item);
+		}
+		return menu;
+	}
+
+	private JMenu getMenuWithItems(String name, String[] items, ActionListener l) {
+		JMenu menu = new JMenu(name);
+		for (String itm: items) {
+			if (itm.equals("_")) {
+				menu.add(new JSeparator());
+				continue;
+			}
+			
+			JMenuItem item = new JMenuItem(itm);
+			item.addActionListener(l);
+			menu.add(item);
+		}
+		return menu;
+	}
+	
+
+	private void createNodes(DefaultMutableTreeNode top, File fp) {
+		DefaultMutableTreeNode folder = null;
+		DefaultMutableTreeNode filed = null;
+		
+		File[] files = fp.listFiles();
+
+		for (File file : files) {
+			if (file.isFile()) {
+				DefaultMutableTreeNode f = new DefaultMutableTreeNode(file.getName());
+				top.add(f);
+			} else {
+				DefaultMutableTreeNode dir = new DefaultMutableTreeNode(file.getName());
+				createNodes(dir, file);
+				top.add(dir);
+			}
+		}
+	}
+
 
 	public static void split(int direction) {
 		if (split_root == null || JviFrame.selected == null) {
@@ -98,7 +269,7 @@ public class JviFrame extends JFrame {
 			editor.getEditor().requestFocusInWindow();
 			JviFrame.selected = editor;
 			newSplit.setRightComponent(editor); // Add the new editor on the right
-
+			newSplit.setDividerLocation(0.6);
 			// Replace the focused editor with the new split pane in the parent split pane
 			if (left == focused) {
 				parent.setLeftComponent(newSplit);
