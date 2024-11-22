@@ -1,6 +1,7 @@
 package com.raelity.jvi.cmd;
 
 import com.raelity.jvi.BooleanOption;
+import com.raelity.jvi.Buffer;
 import com.raelity.jvi.Normal;
 import com.raelity.jvi.Options;
 import com.raelity.jvi.ViManager;
@@ -19,9 +20,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.InputStream;
+import java.util.ArrayList;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
@@ -38,6 +43,8 @@ public class EditorPanel extends JPanel {
 	private JLabel generalStatusBar;
 	private JLabel strokeStatusBar;
 	private JLabel modeStatusBar;
+	private ArrayList<EditorBuffer> buffers;
+	private int selectedBuffer = 0;
 
 	public EditorPanel() {
 		setup();
@@ -49,21 +56,25 @@ public class EditorPanel extends JPanel {
 	}
 
 	private void setup() {
+		buffers = new ArrayList<>();
+		buffers.add(new EditorBuffer(null, null));
 		BorderLayout borderLayout2 = new BorderLayout();
-		JPanel statusPanel = new JPanel();
 		generalStatusBar = new JLabel();
 		strokeStatusBar = new JLabel();
 		modeStatusBar = new JLabel();
-		
+
 		GridBagLayout gridBagLayout1 = new GridBagLayout();
 		editorPane = new RSyntaxTextArea();
+		LanguageSupportFactory.get().register(editorPane);
 		RTextScrollPane editor_scroll;
 
-		editorPane.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+		//editorPane.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_GO);
 		editorPane.setCodeFoldingEnabled(true);
+		editorPane.setTabSize(2);
+		
 		ViManager.installKeymap(editorPane);
 		setDarkMode();
-		
+
 		// Wrap it in an RTextScrollPane to enable line numbers
 		editor_scroll = new RTextScrollPane(editorPane);
 		editor_scroll.setLineNumbersEnabled(true); // Line numbers are enabled by default
@@ -71,24 +82,30 @@ public class EditorPanel extends JPanel {
 		editor_scroll.setIconRowHeaderEnabled(true);
 
 		this.setLayout(borderLayout2);
-		statusPanel.setLayout(gridBagLayout1);
-		generalStatusBar.setText("commandInputAndGeneralStatus");
 
-		strokeStatusBar.setMinimumSize(new Dimension(60, 21));
-		strokeStatusBar.setPreferredSize(new Dimension(60, 0));
-		strokeStatusBar.setText("strokes");
-		modeStatusBar.setMinimumSize(new Dimension(80, 4));
-		modeStatusBar.setPreferredSize(new Dimension(80, 4));
+		generalStatusBar.setText("");
+		strokeStatusBar.setText("");
 		modeStatusBar.setText("NORMAL");
 
 		this.add(editor_scroll, BorderLayout.CENTER);
-		this.add(statusPanel, BorderLayout.SOUTH);
-		statusPanel.add(generalStatusBar, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-			GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 111, 0));
-		statusPanel.add(strokeStatusBar, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-			GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 2, 0, 0), 0, 0));
-		statusPanel.add(modeStatusBar, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-			GridBagConstraints.WEST, GridBagConstraints.VERTICAL, new Insets(0, 2, 0, 0), 0, 0));
+		// Create the toolbar
+		JToolBar toolBar = new JToolBar();
+		toolBar.setFloatable(false); // Make the toolbar fixed
+
+		// Create the left label
+		// Create the two right labels
+		// Use a Box for right alignment of the labels
+		Box rightBox = Box.createHorizontalBox();
+		rightBox.add(Box.createHorizontalGlue()); // Push components to the right
+		rightBox.add(generalStatusBar);
+		rightBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		rightBox.add(strokeStatusBar);
+		this.add(toolBar, BorderLayout.SOUTH);
+
+		// Add the components to the toolbar
+		toolBar.add(modeStatusBar); // Left-aligned label
+		toolBar.add(Box.createHorizontalGlue()); // Filler to push subsequent components to the right
+		toolBar.add(rightBox);
 
 		editorPane.addCaretListener((event) -> {
 			try {
@@ -138,7 +155,7 @@ public class EditorPanel extends JPanel {
 		sd.strokeStatus = strokeStatusBar;
 		sd.modeStatus = modeStatusBar;
 		sd.displayMode("normal".toUpperCase());
-		// G.setEditor(new TextView(editorPane, sd));
+// G.setEditor(new TextView(editorPane, sd));
 
 		// add a mouse listener so that selection by mouse events is treated as visual mode as well
 		editorPane.addMouseMotionListener(new MouseMotionListener() {
@@ -161,6 +178,19 @@ public class EditorPanel extends JPanel {
 				if (e.getKeyChar() == 'v' && e.getModifiers() == KeyEvent.CTRL_MASK) {
 					Normal.normal_cmd(0x1f & e.getKeyChar(), true);
 				}
+
+				String buffer_text = buffers.get(selectedBuffer).getText();
+				String text = editorPane.getText();
+				boolean insert_mode = modeStatusBar.getText().equals("INSERT");
+				if (insert_mode) {
+					if (buffer_text == null) {
+						buffers.get(selectedBuffer).setText(text);
+					} else if (!buffer_text.equals(text)) {
+						System.out.println("Buffer add: " + text);
+						buffers.get(selectedBuffer).setText(text);
+					}
+				}
+
 			}
 
 			public void keyPressed(KeyEvent e) {
