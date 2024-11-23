@@ -44,6 +44,7 @@ import com.raelity.jvi.swing.KeyBinding;
 
 import static com.raelity.jvi.Constants.*;
 import static com.raelity.jvi.KeyDefs.*;
+import com.raelity.jvi.cmd.JviFrame;
 
 /**
  * Contains the main routine for processing characters in command mode.
@@ -916,6 +917,8 @@ middle_code:
 	      ca.nchar = 'u';
 	      nv_operator(ca);
 	      break;
+	    } else {
+	      nv_Undo(ca);
 	    }
 	    /* FALLTHROUGH */
 
@@ -933,6 +936,7 @@ middle_code:
 	      Misc.u_redo((int)ca.count1);
 	      G.curwin.setWSetCurswant(true);
 	    }
+	    JviFrame.selected.getEditor().redoLastAction();
 	    break;
 
 	  case 'U':		/* Undo line */
@@ -3411,7 +3415,7 @@ static private void nv_findpar(CMDARG cap, int dir)
           cap.nchar = 'U';
           nv_operator(cap);
     } else if (!checkclearopq(cap.oap)) {
-          //u_undoline();
+	  JviFrame.selected.getEditor().undoLastAction();
           notSup("nv_Undo");
           G.curwin.setWSetCurswant(true);
     }
