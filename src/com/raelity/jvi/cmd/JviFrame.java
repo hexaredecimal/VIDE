@@ -27,6 +27,8 @@
  */
 package com.raelity.jvi.cmd;
 
+import com.raelity.jvi.Normal;
+import com.raelity.jvi.ViManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -46,7 +48,9 @@ public class JviFrame extends JFrame {
 	public static JTree file_tree = new JTree();
 	public static JSplitPane split_root = new JSplitPane();
 	public static EditorPanel selected = null;
-
+	private static JMenu buffers = null;
+	private static JFrame self = null;
+	private static JMenuBar mb = new JMenuBar(); 
 	//Construct the frame
 	public JviFrame() {
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
@@ -59,6 +63,7 @@ public class JviFrame extends JFrame {
 
 	//Component initialization
 	private void jbInit() throws Exception {
+		self = this;
 		contentPane = (JPanel) this.getContentPane();
 		contentPane.setLayout(borderLayout1);
 		this.setSize(new Dimension(400, 285));
@@ -72,8 +77,8 @@ public class JviFrame extends JFrame {
 		split_root.setRightComponent(new EditorPanel());
 		split_root.setDividerLocation(0);
 		contentPane.add(split_root);
-
-		this.setJMenuBar(setUpMenuBar());
+		setUpMenuBar();
+		this.setJMenuBar(mb); 
 	}
 
 	private void loadDirectory(String file) {
@@ -96,9 +101,7 @@ public class JviFrame extends JFrame {
 		}
 	}
 
-	private JMenuBar setUpMenuBar() {
-		JMenuBar mb = new JMenuBar(); 
-
+	private void setUpMenuBar() {
 		String[] file_menu_items = {
 			"Open", "Split-Open", "OpenTab", "New", "Close", "_", 
 			"Save", "Save As...", "_", "Split Diff With...", "Split Patched By...", "_", 
@@ -114,9 +117,43 @@ public class JviFrame extends JFrame {
 			"Select All", "_", "Find", "Find And Replace", "_", "Settings Window", "Startup Settings"
 		};
 		
-		JMenu edit = new JMenu("Edit");
+		JMenu edit = getMenuWithItems("Edit", edit_menu_items, action -> {
+			String cmd = action.getActionCommand(); 
+			var editor = selected.getEditor();
+
+			if (cmd.equals("Undo")) {
+				editor.undoLastAction();
+				return;
+			}
+
+			if (cmd.equals("Redo")) {
+				editor.redoLastAction();
+				return;
+			}
+			
+			if (cmd.equals("Repeat")) {
+				Normal.normal_cmd('.', true);
+				return;
+			}
+
+			if (cmd.equals("Cut")) {
+				
+				return;
+			}
+
+			if (cmd.equals("Copy")) {
+				
+				return;
+			}
+
+			if (cmd.equals("Paste")) {
+				
+				return;
+			}
+
+
+		});
 		mb.add(edit);
-		putMenuItems(edit, edit_menu_items);
 		
 
 		String[] tools_menu_items = {
