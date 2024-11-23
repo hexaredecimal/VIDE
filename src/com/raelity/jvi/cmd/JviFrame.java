@@ -209,10 +209,45 @@ public class JviFrame extends JFrame {
 			selected.getEditor().setSyntaxEditingStyle(VideLanguages.valueOf(lang).getHighlight());
 		});
 		syntax.add(languages, 0);
-		return mb;
+
+		makeBuffersMenu();
 	}
 
-	private void putMenuItems(JMenu menu, String[] items) {
+	private static void makeBuffersMenu() {
+		String[] buffers_menu_items = {"Refresh Menu", "Delete", "Alternate", "Next", "Previous", "_"};
+		buffers = getMenuWithItems("Buffers", buffers_menu_items, (action) -> {
+			String cmd = action.getActionCommand(); 
+			if (cmd.equals("Next")) {
+				selected.nextBuffer();
+				selected.updateEditorFrame();
+				return;
+			}
+			
+			if (cmd.equals("Previous")) {
+				selected.previousBuffer();
+				selected.updateEditorFrame();
+				return;
+			}
+		});
+		mb.add(buffers);
+		
+		var _buffers = selected.getBuffers();
+		for (int i = 0; i < _buffers.size(); i++) {
+			var buffer = _buffers.get(i);
+			var name = buffer.getFile();
+			JMenuItem item = new JMenuItem(String.format("[%s] (%d)", name == null ? "No name" : name, i + 1));
+			buffers.add(item);
+		}
+	}
+
+	public static void updateOpenBuffers() {
+		mb.remove(buffers);
+		makeBuffersMenu();
+		mb.revalidate();
+		mb.repaint();
+	}
+
+	private static void putMenuItems(JMenu menu, String[] items) {
 		for (String itm: items) {
 			if (itm.equals("_")) {
 				menu.add(new JSeparator());
