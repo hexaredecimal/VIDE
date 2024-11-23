@@ -259,7 +259,7 @@ public class JviFrame extends JFrame {
 		}
 	}
 	
-	private JMenu getMenuWithItems(String name, String[] items) {
+	private static JMenu getMenuWithItems(String name, String[] items) {
 		JMenu menu = new JMenu(name);
 		for (String itm: items) {
 			if (itm.equals("_")) {
@@ -273,7 +273,7 @@ public class JviFrame extends JFrame {
 		return menu;
 	}
 
-	private JMenu getMenuWithItems(String name, String[] items, ActionListener l) {
+	private static JMenu getMenuWithItems(String name, String[] items, ActionListener l) {
 		JMenu menu = new JMenu(name);
 		for (String itm: items) {
 			if (itm.equals("_")) {
