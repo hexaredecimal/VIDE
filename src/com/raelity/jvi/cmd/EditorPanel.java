@@ -1,5 +1,6 @@
 package com.raelity.jvi.cmd;
 
+import blazing.fs.FileSystem;
 import com.raelity.jvi.BooleanOption;
 import com.raelity.jvi.Buffer;
 import com.raelity.jvi.Normal;
@@ -19,6 +20,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import javax.swing.Action;
@@ -43,6 +45,8 @@ public class EditorPanel extends JPanel {
 	private JLabel generalStatusBar;
 	private JLabel strokeStatusBar;
 	private JLabel modeStatusBar;
+	private JLabel bufferName;
+	private JLabel syntaxType;
 	private ArrayList<EditorBuffer> buffers;
 	private int selectedBuffer = 0;
 
@@ -55,13 +59,119 @@ public class EditorPanel extends JPanel {
 		return editorPane;
 	}
 
+	public ArrayList<EditorBuffer> getBuffers() {
+		return buffers;
+	}
+	
+	public void nextBuffer() {
+		int buffers_size = this.buffers.size(); 
+		selectedBuffer = ++selectedBuffer % buffers_size;
+	}
+	
+	public void previousBuffer() {
+		int buffers_size = this.buffers.size(); 
+		selectedBuffer = --selectedBuffer % buffers_size;
+		if (selectedBuffer < 0) selectedBuffer = buffers_size - 1;
+	}
+
+	public void updateCurrentBuffer() {
+		this.buffers.get(this.selectedBuffer).setText(editorPane.getText());
+	}
+
+	public EditorBuffer currentBuffer() {
+		return this.buffers.get(this.selectedBuffer);
+	}
+	
+	public boolean isCurrentBufferDirty() {
+		String editor_text = editorPane.getText(); 
+		String buffer_text = this.buffers.get(this.selectedBuffer).getText(); 
+		return !buffer_text.equals(editor_text);
+	}
+
+	public void setCurrentBufferText(String text) {
+		this.buffers.get(this.selectedBuffer).setText(text);
+	}
+	
+	public void setCurrentBufferFile(String file) {
+		this.buffers.get(this.selectedBuffer).setFile(file);
+	}
+
+	public EditorBuffer emplaceBuffer() {
+		buffers.add(new EditorBuffer(null, null));
+		this.nextBuffer();
+		return this.currentBuffer();
+	}
+	
+	public void updateBufferStatus() {
+		this.bufferName.setText(this.buffers.get(this.selectedBuffer).getFile());
+	}
+
+	public void updateEditorFrame() {
+		this.updateBufferStatus();
+		this.setSyntaxFromBufferName();
+		this.editorPane.setText(this.currentBuffer().getText());
+	}
+
+	private void setSyntaxFromBufferName() {
+		String buffer = this.buffers.get(this.selectedBuffer).getFile();
+		if (buffer == null) {
+			editorPane.setSyntaxEditingStyle(VideLanguages.fromFileType("txt").getHighlight());
+			return;
+		}
+		var ext = FileSystem.fileExtension(buffer);
+		String type = ext == null ? "txt" : ext;
+		this.setSyntaxTypeLabel(type);
+		editorPane.setSyntaxEditingStyle(VideLanguages.fromFileType(type).getHighlight());
+	}
+
+	public boolean isBufferExists(String path) {
+		for (var buffer: this.buffers) {
+			if (buffer.getText().equals(path)) return true;
+		}
+		return false;
+	}
+
+	public EditorBuffer getBufferByFile(String path) {
+		for (var buffer: this.buffers) {
+			if (buffer.getText().equals(path)) return buffer;
+		}
+		return null;
+	}
+	
+	public EditorBuffer getBufferByIndex(int index) {
+		return this.buffers.get(index);
+	}
+
+	public int getCurrentBufferIndex() {
+		return selectedBuffer;
+	}
+
+	public EditorBuffer getFirstBuffer() {
+		return this.buffers.get(0);
+	}
+
+
+	public void replaceFirstBuffer(EditorBuffer buffer) {
+		this.buffers.set(0, buffer);
+	}
+	
+	public void replaceBuffer(EditorBuffer buffer, int index) {
+		this.buffers.set(index, buffer);
+	}
+	
+	private void setSyntaxTypeLabel(String type) {
+		this.syntaxType.setText(type);
+	}
+	
 	private void setup() {
 		buffers = new ArrayList<>();
-		buffers.add(new EditorBuffer(null, null));
+		buffers.add(new EditorBuffer(null, ""));
 		BorderLayout borderLayout2 = new BorderLayout();
 		generalStatusBar = new JLabel();
 		strokeStatusBar = new JLabel();
 		modeStatusBar = new JLabel();
+		bufferName = new JLabel();
+		syntaxType = new JLabel();
 
 		GridBagLayout gridBagLayout1 = new GridBagLayout();
 		editorPane = new RSyntaxTextArea();
@@ -83,6 +193,8 @@ public class EditorPanel extends JPanel {
 
 		this.setLayout(borderLayout2);
 
+		syntaxType.setText("txt");
+		bufferName.setText("buffer");
 		generalStatusBar.setText("");
 		strokeStatusBar.setText("");
 		modeStatusBar.setText("NORMAL");
@@ -102,10 +214,21 @@ public class EditorPanel extends JPanel {
 		rightBox.add(strokeStatusBar);
 		this.add(toolBar, BorderLayout.SOUTH);
 
+
+		Box leftBox = Box.createHorizontalBox();
+		leftBox.add(modeStatusBar);
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		leftBox.add(bufferName);
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		leftBox.add(syntaxType);
+
 		// Add the components to the toolbar
-		toolBar.add(modeStatusBar); // Left-aligned label
+		toolBar.add(leftBox); // Left-aligned label
 		toolBar.add(Box.createHorizontalGlue()); // Filler to push subsequent components to the right
 		toolBar.add(rightBox);
+		
+		if (JviFrame.selected == null) 
+			JviFrame.selected = this;
 
 		editorPane.addCaretListener((event) -> {
 			try {
@@ -123,6 +246,7 @@ public class EditorPanel extends JPanel {
 			@Override
 			public void focusGained(FocusEvent fe) {
 				JviFrame.selected = pnl;
+				JviFrame.updateOpenBuffers();
 			}
 
 			@Override
