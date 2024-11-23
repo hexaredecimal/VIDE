@@ -28,6 +28,7 @@
  */
 package com.raelity.jvi;
 
+import blazing.fs.FileSystem;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -48,7 +49,10 @@ import com.raelity.jvi.ViTextView.TAGOP;
 
 import static com.raelity.jvi.Constants.*;
 import static com.raelity.jvi.ColonCommandFlags.*;
+import com.raelity.jvi.cmd.EditorBuffer;
 import com.raelity.jvi.cmd.JviFrame;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.JSplitPane;
 
 /**
@@ -620,6 +624,21 @@ public class ColonCommands {
 			JviFrame.file_tree.expandRow(0);
 		}};
 
+  static ActionListener ACTION_next = new ActionListener() {
+    public void actionPerformed(ActionEvent ev) {
+      ColonEvent cev = (ColonEvent)ev;
+      // NEEDSWORK: win_close: hidden, need_hide....
+			JviFrame.selected.nextBuffer();
+			JviFrame.selected.updateEditorFrame();
+		}};
+  
+	static ActionListener ACTION_previous = new ActionListener() {
+    public void actionPerformed(ActionEvent ev) {
+      ColonEvent cev = (ColonEvent)ev;
+      // NEEDSWORK: win_close: hidden, need_hide....
+			JviFrame.selected.previousBuffer();
+			JviFrame.selected.updateEditorFrame();
+		}};
 	
   static ActionListener ACTION_toggle_explore = new ActionListener() {
     public void actionPerformed(ActionEvent ev) {
@@ -661,14 +680,29 @@ public class ColonCommands {
 
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
-      if(cev.getNArg() == 0) {
-        ViManager.getFS().write(cev.getViTextView(), cev.isBang());
-      } else if(cev.getNArg() == 1 && cev.getArg(1).equals("*")) {
-        ViManager.getFS().write(cev.getViTextView(), null, cev.isBang());
-      } else {
-        Msg.emsg("Only single argument '*' allowed");
-      }
-    }
+			var buffer = JviFrame.selected.currentBuffer();
+			String file_path = cev.getArgs() != null ? cev.getArg(1).trim() : buffer.getFile(); 
+
+			if (file_path == null) {
+        Msg.emsg("No file name");
+				return;
+			}
+
+			if (buffer.getFile() == null) buffer.setFile(file_path);
+			JviFrame.selected.updateCurrentBuffer();
+			JviFrame.selected.updateEditorFrame();
+			String text = buffer.getText();
+			File fp = new File(file_path);
+			try {
+				fp.createNewFile();
+			} catch (IOException ex) {
+        Msg.emsg("error: " + ex.getMessage());
+				return;
+			}
+			var result = FileSystem.writeToFile(fp, text);
+			assert result.isOk();
+    	JviFrame.updateOpenBuffers();
+		}
   };
   
   static ColonAction ACTION_wq = new ColonAction() {
@@ -688,9 +722,6 @@ public class ColonCommands {
     }
   };
 
-  /**
-   * Edit command. Only ':e#[number]' is supported.
-   */
   static ColonAction ACTION_edit = new ColonAction() {
     public int getFlags() {
       return BANG;
@@ -698,35 +729,48 @@ public class ColonCommands {
 
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
-      String arg;
-      boolean error = false;
-      /*
-      if(cev.getNArg() == 0) {
-        ViManager.getFS().write(cev.getViTextView(), cev.isBang());
-      } else
-      */
-      if(cev.getNArg() == 1 && cev.getArg(1).charAt(0) == '#') {
-        int i = -1;
-        arg = cev.getArg(1);
-        if(arg.length() > 1) {
-          arg = arg.substring(1);
-          try {
-            i = Integer.parseInt(arg);
-          } catch(NumberFormatException ex) {
-            error = true;
-          }
-        }
-        if( ! error) {
-          ViManager.getFS().edit(cev.getViTextView(), i, cev.isBang());
-        }
-      } else {
-        error = true;
-      }
+			if (cev.getArgs() == null) {
+        Msg.emsg("No file name");
+				return;
+			}
+			
+			boolean is_bang = cev.isBang();
+			String file_path = cev.getArg(1).trim(); 
+			boolean is_dirty = JviFrame.selected.isCurrentBufferDirty();
+			if (file_path.equals("*")) {
+        Msg.emsg(":e [file_path]");
+				return;
+			}
 
-      if(error) {
-        Msg.emsg("Only 'e#[<number>]' allowed");
-      }
-    }
+			if (!is_bang && is_dirty) {
+        Msg.emsg("No write since last change (use :e! to override)");
+				return;
+			}
+			JviFrame.selected.updateCurrentBuffer();
+			
+			var first_buffer = JviFrame.selected.getFirstBuffer(); 
+			EditorBuffer buffer = null;
+			if (first_buffer.getFile() == null) {// Replace the default buffer if we still have it
+				buffer = first_buffer;
+			} else {
+				buffer = JviFrame.selected.isBufferExists(file_path) 
+					? JviFrame.selected.getBufferByFile(new File(file_path).getName())
+					: JviFrame.selected.emplaceBuffer();
+			}
+
+			if (buffer.getFile() == null)
+				buffer.setFile(new File(file_path).getName());
+			
+			var contents = FileSystem.readFileToString(file_path); 
+			if (contents.isErr()) { // Open a new buffer
+				buffer.setText("");
+			} else {
+				var text = contents.unwrap();
+				buffer.setText(text);
+			} 
+    	JviFrame.selected.updateEditorFrame();
+    	JviFrame.updateOpenBuffers();
+		}
   };
   
   static ColonAction ACTION_substitute = new ColonAction() {
@@ -958,7 +1002,10 @@ public class ColonCommands {
     
     register("Exp", "Explore", ACTION_explore);
     register("Tog", "ToggleExplore", ACTION_toggle_explore);
-    // register("y", "yank", ACTION_yank);
+    
+    register("bn", "bnext", ACTION_next);
+    register("bp", "bprevious", ACTION_previous);
+		// register("y", "yank", ACTION_yank);
     
     // register("n", "next", ACTION_next);
     // register("N", "Next", ACTION_Next);
