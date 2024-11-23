@@ -336,10 +336,10 @@ public class EditorPanel extends JPanel {
 	}
 
 	public void setDarkMode() {
-		setTheme("dark");
+		setTheme("monokai");
 	}
 
 	public void setLight() {
-		setTheme("light");
+		setTheme("vs");
 	}
 }
