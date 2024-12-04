@@ -62,16 +62,18 @@ public class EditorPanel extends JPanel {
 	public ArrayList<EditorBuffer> getBuffers() {
 		return buffers;
 	}
-	
+
 	public void nextBuffer() {
-		int buffers_size = this.buffers.size(); 
+		int buffers_size = this.buffers.size();
 		selectedBuffer = ++selectedBuffer % buffers_size;
 	}
-	
+
 	public void previousBuffer() {
-		int buffers_size = this.buffers.size(); 
+		int buffers_size = this.buffers.size();
 		selectedBuffer = --selectedBuffer % buffers_size;
-		if (selectedBuffer < 0) selectedBuffer = buffers_size - 1;
+		if (selectedBuffer < 0) {
+			selectedBuffer = buffers_size - 1;
+		}
 	}
 
 	public void updateCurrentBuffer() {
@@ -81,17 +83,17 @@ public class EditorPanel extends JPanel {
 	public EditorBuffer currentBuffer() {
 		return this.buffers.get(this.selectedBuffer);
 	}
-	
+
 	public boolean isCurrentBufferDirty() {
-		String editor_text = editorPane.getText(); 
-		String buffer_text = this.buffers.get(this.selectedBuffer).getText(); 
+		String editor_text = editorPane.getText();
+		String buffer_text = this.buffers.get(this.selectedBuffer).getText();
 		return !buffer_text.equals(editor_text);
 	}
 
 	public void setCurrentBufferText(String text) {
 		this.buffers.get(this.selectedBuffer).setText(text);
 	}
-	
+
 	public void setCurrentBufferFile(String file) {
 		this.buffers.get(this.selectedBuffer).setFile(file);
 	}
@@ -101,7 +103,7 @@ public class EditorPanel extends JPanel {
 		this.nextBuffer();
 		return this.currentBuffer();
 	}
-	
+
 	public void updateBufferStatus() {
 		this.bufferName.setText(this.buffers.get(this.selectedBuffer).getFile());
 	}
@@ -125,19 +127,23 @@ public class EditorPanel extends JPanel {
 	}
 
 	public boolean isBufferExists(String path) {
-		for (var buffer: this.buffers) {
-			if (buffer.getText().equals(path)) return true;
+		for (var buffer : this.buffers) {
+			if (buffer.getText().equals(path)) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	public EditorBuffer getBufferByFile(String path) {
-		for (var buffer: this.buffers) {
-			if (buffer.getText().equals(path)) return buffer;
+		for (var buffer : this.buffers) {
+			if (buffer.getText().equals(path)) {
+				return buffer;
+			}
 		}
 		return null;
 	}
-	
+
 	public EditorBuffer getBufferByIndex(int index) {
 		return this.buffers.get(index);
 	}
@@ -150,19 +156,18 @@ public class EditorPanel extends JPanel {
 		return this.buffers.get(0);
 	}
 
-
 	public void replaceFirstBuffer(EditorBuffer buffer) {
 		this.buffers.set(0, buffer);
 	}
-	
+
 	public void replaceBuffer(EditorBuffer buffer, int index) {
 		this.buffers.set(index, buffer);
 	}
-	
+
 	private void setSyntaxTypeLabel(String type) {
 		this.syntaxType.setText(type);
 	}
-	
+
 	private void setup() {
 		buffers = new ArrayList<>();
 		buffers.add(new EditorBuffer(null, ""));
@@ -336,10 +341,14 @@ public class EditorPanel extends JPanel {
 	}
 
 	public void setDarkMode() {
+		FlatDarkLaf.setup();
+		FlatDarkLaf.updateUI();
 		setTheme("monokai");
 	}
 
-	public void setLight() {
+	public void setLightMode() {
+		FlatLightLaf.setup();
+		FlatLightLaf.updateUI();
 		setTheme("vs");
 	}
 }
