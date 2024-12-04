@@ -189,9 +189,10 @@ public class EditorPanel extends JPanel {
 		//editorPane.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_GO);
 		editorPane.setCodeFoldingEnabled(true);
 		editorPane.setTabSize(2);
-		
+
 		ViManager.installKeymap(editorPane);
-		setDarkMode();
+		//setDarkMode();
+		setLightMode();
 
 		// Wrap it in an RTextScrollPane to enable line numbers
 		editor_scroll = new RTextScrollPane(editorPane);
