@@ -29,6 +29,7 @@ import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -218,24 +219,33 @@ public class EditorPanel extends JPanel {
 		rightBox.add(Box.createHorizontalGlue()); // Push components to the right
 		rightBox.add(generalStatusBar);
 		rightBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		rightBox.add(new JSeparator(JSeparator.VERTICAL));
+		rightBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
 		rightBox.add(strokeStatusBar);
 		this.add(toolBar, BorderLayout.SOUTH);
 
-
 		Box leftBox = Box.createHorizontalBox();
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
 		leftBox.add(modeStatusBar);
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		leftBox.add(new JSeparator(JSeparator.VERTICAL));
 		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
 		leftBox.add(bufferName);
 		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		leftBox.add(new JSeparator(JSeparator.VERTICAL));
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
 		leftBox.add(syntaxType);
+		leftBox.add(Box.createHorizontalStrut(10)); // Add spacing between labels
+		leftBox.add(new JSeparator(JSeparator.VERTICAL));
 
 		// Add the components to the toolbar
 		toolBar.add(leftBox); // Left-aligned label
 		toolBar.add(Box.createHorizontalGlue()); // Filler to push subsequent components to the right
 		toolBar.add(rightBox);
-		
-		if (JviFrame.selected == null) 
+
+		if (JviFrame.selected == null) {
 			JviFrame.selected = this;
+		}
 
 		editorPane.addCaretListener((event) -> {
 			try {
