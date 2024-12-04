@@ -28,6 +28,7 @@
 package com.application;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -40,61 +41,57 @@ import com.raelity.jvi.cmd.JviFrame;
 
 public class Jvi {
 
-	static JviFrame frame1;
+  static JviFrame frame1;
 
-	//Construct the application
-	public static JviFrame makeFrame() {
-		FlatDarkLaf.setup();
-		FlatDarkLaf.updateUI();
-		JviFrame frame = new JviFrame();
-		frame.setVisible(true);
-		return frame;
-	}
+  //Construct the application
+  public static JviFrame makeFrame() {
+    JviFrame frame = new JviFrame();
+    frame.setVisible(true);
+    return frame;
+  }
 
+  //Main method
+  public static void main(String[] args) {
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    ViManager.setViFactory(new DefaultViFactory(null/*frame.commandLine1*/));
 
-	//Main method
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		ViManager.setViFactory(new DefaultViFactory(null/*frame.commandLine1*/));
+    ColonCommands.register("dumpOptions", "dumpOptions", new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          ViManager.getViFactory().getPreferences().exportSubtree(System.out);
+        } catch (BackingStoreException ex) {
+          ex.printStackTrace();
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+    ColonCommands.register("deleteOptions", "deleteOptions", new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          String keys[] = ViManager.getViFactory().getPreferences().keys();
+          for (String key : keys) {
+            ViManager.getViFactory().getPreferences().remove(key);
+          }
+        } catch (BackingStoreException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
 
-		ColonCommands.register("dumpOptions", "dumpOptions", new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					ViManager.getViFactory().getPreferences().exportSubtree(System.out);
-				} catch (BackingStoreException ex) {
-					ex.printStackTrace();
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
-		ColonCommands.register("deleteOptions", "deleteOptions", new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String keys[] = ViManager.getViFactory().getPreferences().keys();
-					for (String key : keys) {
-						ViManager.getViFactory().getPreferences().remove(key);
-					}
-				} catch (BackingStoreException ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
+    try {
+      SwingUtilities.invokeAndWait(new Runnable() {
+        public void run() {
+          makeFrame();
+        }
+      });
+    } catch (Exception e) {
+    }
 
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-				public void run() {
-					makeFrame();
-				}
-			});
-		} catch (Exception e) {
-		}
-
-
-		// wait for frame to exit, so JUnitTest won't kill it
-	}
+    // wait for frame to exit, so JUnitTest won't kill it
+  }
 }
