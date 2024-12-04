@@ -1,6 +1,8 @@
 package com.raelity.jvi.cmd;
 
 import blazing.fs.FileSystem;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.raelity.jvi.BooleanOption;
 import com.raelity.jvi.Buffer;
 import com.raelity.jvi.Normal;
