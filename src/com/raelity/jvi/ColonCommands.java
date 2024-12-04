@@ -50,6 +50,7 @@ import com.raelity.jvi.ViTextView.TAGOP;
 import static com.raelity.jvi.Constants.*;
 import static com.raelity.jvi.ColonCommandFlags.*;
 import com.raelity.jvi.cmd.EditorBuffer;
+import com.raelity.jvi.cmd.EditorPanel;
 import com.raelity.jvi.cmd.JviFrame;
 import java.io.File;
 import java.io.IOException;
@@ -605,14 +606,14 @@ public class ColonCommands {
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
       // NEEDSWORK: win_close: hidden, need_hide....
-    	JviFrame.split(JSplitPane.HORIZONTAL_SPLIT);
+    	JviFrame.split(JSplitPane.HORIZONTAL_SPLIT, new EditorPanel());
 		}};
 
   static ActionListener ACTION_vsplit = new ActionListener() {
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
       // NEEDSWORK: win_close: hidden, need_hide....
-    	JviFrame.split(JSplitPane.VERTICAL_SPLIT);
+    	JviFrame.split(JSplitPane.VERTICAL_SPLIT, new EditorPanel());
 		}};
 
   static ActionListener ACTION_explore = new ActionListener() {
