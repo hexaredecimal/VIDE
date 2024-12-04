@@ -52,6 +52,7 @@ import static com.raelity.jvi.ColonCommandFlags.*;
 import com.raelity.jvi.cmd.EditorBuffer;
 import com.raelity.jvi.cmd.EditorPanel;
 import com.raelity.jvi.cmd.JviFrame;
+import com.raelity.jvi.fs.Utils;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JSplitPane;
@@ -683,7 +684,6 @@ public class ColonCommands {
       ColonEvent cev = (ColonEvent)ev;
 			var buffer = JviFrame.selected.currentBuffer();
 			String file_path = cev.getArgs() != null ? cev.getArg(1).trim() : buffer.getFile(); 
-
 			if (file_path == null) {
         Msg.emsg("No file name");
 				return;
@@ -693,14 +693,7 @@ public class ColonCommands {
 			JviFrame.selected.updateCurrentBuffer();
 			JviFrame.selected.updateEditorFrame();
 			String text = buffer.getText();
-			File fp = new File(file_path);
-			try {
-				fp.createNewFile();
-			} catch (IOException ex) {
-        Msg.emsg("error: " + ex.getMessage());
-				return;
-			}
-			var result = FileSystem.writeToFile(fp, text);
+			var result = Utils.writeToFile(file_path, text);
 			assert result.isOk();
     	JviFrame.updateOpenBuffers();
 		}
@@ -747,30 +740,8 @@ public class ColonCommands {
         Msg.emsg("No write since last change (use :e! to override)");
 				return;
 			}
-			JviFrame.selected.updateCurrentBuffer();
-			
-			var first_buffer = JviFrame.selected.getFirstBuffer(); 
-			EditorBuffer buffer = null;
-			if (first_buffer.getFile() == null) {// Replace the default buffer if we still have it
-				buffer = first_buffer;
-			} else {
-				buffer = JviFrame.selected.isBufferExists(file_path) 
-					? JviFrame.selected.getBufferByFile(new File(file_path).getName())
-					: JviFrame.selected.emplaceBuffer();
-			}
 
-			if (buffer.getFile() == null)
-				buffer.setFile(new File(file_path).getName());
-			
-			var contents = FileSystem.readFileToString(file_path); 
-			if (contents.isErr()) { // Open a new buffer
-				buffer.setText("");
-			} else {
-				var text = contents.unwrap();
-				buffer.setText(text);
-			} 
-    	JviFrame.selected.updateEditorFrame();
-    	JviFrame.updateOpenBuffers();
+			Utils.openFile(file_path);
 		}
   };
   
