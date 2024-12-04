@@ -154,7 +154,18 @@ public class JviFrame extends JFrame {
 
 		});
 		mb.add(edit);
-		
+		// TODO: Add Global Settings, FileSettings
+
+		String[] colors = {"Dark", "Light"};
+		JMenu color_scheme = getMenuWithItems("color Scheme", colors, action -> {
+			String target = action.getActionCommand(); 
+			if (target.equals("Dark")) {
+				JviFrame.selected.setDarkMode();
+			} else if (target.equals("Light")) {
+				JviFrame.selected.setLightMode();
+			}
+		});
+		edit.add(color_scheme);
 
 		String[] tools_menu_items = {
 			"Jump To This Tag", "Jump Back", "Build Tags File", "_",
