@@ -319,7 +319,7 @@ public class JviFrame extends JFrame {
 	}
 
 
-	public static void split(int direction) {
+	public static void split(int direction, EditorPanel panel) {
 		if (split_root == null || JviFrame.selected == null) {
 			System.out.println("No split root or selected component.");
 			return;
@@ -328,14 +328,14 @@ public class JviFrame extends JFrame {
 		var focused = JviFrame.selected;
 
 		// Traverse and add the new split pane
-		boolean result = traverseAndSplit(split_root, focused, direction);
+		boolean result = traverseAndSplit(split_root, focused, direction, panel);
 
 		if (!result) {
 			System.out.println("Failed to split: Focused editor not found in the split hierarchy.");
 		}
 	}
 
-	private static boolean traverseAndSplit(JSplitPane parent, Component focused, int direction) {
+	private static boolean traverseAndSplit(JSplitPane parent, Component focused, int direction, EditorPanel panel) {
 		if (parent == null) {
 			return false;
 		}
@@ -348,10 +348,8 @@ public class JviFrame extends JFrame {
 			// Create a new split pane
 			JSplitPane newSplit = new JSplitPane(direction);
 			newSplit.setLeftComponent(focused); // Keep the focused editor as the left component
-			var editor = new EditorPanel();
-			editor.getEditor().requestFocusInWindow();
-			JviFrame.selected = editor;
-			newSplit.setRightComponent(editor); // Add the new editor on the right
+			JviFrame.selected = panel;
+			newSplit.setRightComponent(panel); // Add the new editor on the right
 			newSplit.setDividerLocation(0.6);
 			// Replace the focused editor with the new split pane in the parent split pane
 			if (left == focused) {
@@ -367,17 +365,12 @@ public class JviFrame extends JFrame {
 		}
 
 		// Recursive case: check child splits
-		boolean leftResult = (left instanceof JSplitPane) && traverseAndSplit((JSplitPane) left, focused, direction);
-		boolean rightResult = (right instanceof JSplitPane) && traverseAndSplit((JSplitPane) right, focused, direction);
+		boolean leftResult = (left instanceof JSplitPane) && traverseAndSplit((JSplitPane) left, focused, direction, panel);
+		boolean rightResult = (right instanceof JSplitPane) && traverseAndSplit((JSplitPane) right, focused, direction, panel);
 
 		return leftResult || rightResult;
 	}
 
-	
-	/*
-	public static void unsplitFocused() {
-		//TODO
-	}*/
 
 	public static void unsplitFocused() {
 		if (split_root == null || JviFrame.selected == null) {
@@ -385,10 +378,8 @@ public class JviFrame extends JFrame {
 			return;
 		}
 
-		var focused = JviFrame.selected;
-
 		// Traverse and modify the tree
-		boolean result = traverseAndUnsplit(split_root, focused);
+		boolean result = traverseAndUnsplit(split_root, JviFrame.selected);
 
 		if (!result) {
 			System.out.println("Failed to unsplit: Focused editor not found in the split hierarchy.");
