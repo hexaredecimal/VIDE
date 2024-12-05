@@ -607,14 +607,18 @@ public class ColonCommands {
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
       // NEEDSWORK: win_close: hidden, need_hide....
-    	JviFrame.split(JSplitPane.HORIZONTAL_SPLIT, new EditorPanel());
+    	JviFrame.split(JSplitPane.HORIZONTAL_SPLIT, EditorPanel.emplaceEditor());
 		}};
 
   static ActionListener ACTION_vsplit = new ActionListener() {
+    public int getFlags() {
+      return BANG;
+    }
+
     public void actionPerformed(ActionEvent ev) {
       ColonEvent cev = (ColonEvent)ev;
       // NEEDSWORK: win_close: hidden, need_hide....
-    	JviFrame.split(JSplitPane.VERTICAL_SPLIT, new EditorPanel());
+    	JviFrame.split(JSplitPane.VERTICAL_SPLIT, EditorPanel.emplaceEditor());
 		}};
 
   static ActionListener ACTION_explore = new ActionListener() {
