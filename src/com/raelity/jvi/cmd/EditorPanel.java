@@ -58,6 +58,13 @@ public class EditorPanel extends JPanel {
 		setupVi();
 	}
 
+
+	public static EditorPanel emplaceEditor() {
+		var editor = new EditorPanel();
+		JviFrame.editors.add(editor);
+		return editor;
+	}
+
 	public RSyntaxTextArea getEditor() {
 		return editorPane;
 	}
