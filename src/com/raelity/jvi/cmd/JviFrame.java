@@ -427,8 +427,16 @@ public class JviFrame extends JFrame {
 			Container grandParent = parent.getParent();
 			if (grandParent instanceof JSplitPane grandSplit) {
 				if (grandSplit.getLeftComponent() == parent) {
+					var result = editors.remove(left);
+					if (!result) {
+						Msg.emsg("Editor not found");
+					}
 					grandSplit.setLeftComponent(sibling);
 				} else {
+					var result = editors.remove(right);
+					if (!result) {
+						Msg.emsg("Editor not found");
+					}
 					grandSplit.setRightComponent(sibling);
 				}
 			} else if (grandParent instanceof JRootPane) {
