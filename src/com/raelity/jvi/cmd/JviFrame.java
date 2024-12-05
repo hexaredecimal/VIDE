@@ -27,11 +27,14 @@
  */
 package com.raelity.jvi.cmd;
 
+import com.raelity.jvi.Msg;
 import com.raelity.jvi.Normal;
 import com.raelity.jvi.ViManager;
+import com.raelity.jvi.fs.Utils;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -103,22 +106,32 @@ public class JviFrame extends JFrame {
 
 	private void setUpMenuBar() {
 		String[] file_menu_items = {
-			"Open", "Split-Open", "OpenTab", "New", "Close", "_", 
-			"Save", "Save As...", "_", "Split Diff With...", "Split Patched By...", "_", 
+			"Open", "Split-Open", "OpenTab", "New", "Close", "_",
+			"Save", "Save As...", "_", "Split Diff With...", "Split Patched By...", "_",
 			"Print", "_", "Save-Exit", "Exit"
 		};
-		
-		JMenu file = new JMenu("File");
+
+		JMenu file = getMenuWithItems("File", file_menu_items, action -> {
+			String target = action.getActionCommand();
+			if (target.equals("Save")) {
+				Utils.saveSelectedBuffer();
+			} else if (target.equals("Save As...")) {
+				Utils.saveSelectedBufferAs();
+			} else if (target.equals("Open")) {
+				Utils.chooseFile();
+			} else if (target.equals("Split-Open")) {
+				Utils.chooseFileAndSplit();
+			}
+		});
 		mb.add(file);
-		putMenuItems(file, file_menu_items);
 
 		String[] edit_menu_items = {
 			"Undo", "Redo", "Repeat", "_", "Cut", "Copy", "Paste", "Put Before", "Put After",
 			"Select All", "_", "Find", "Find And Replace", "_", "Settings Window", "Startup Settings"
 		};
-		
+
 		JMenu edit = getMenuWithItems("Edit", edit_menu_items, action -> {
-			String cmd = action.getActionCommand(); 
+			String cmd = action.getActionCommand();
 			var editor = selected.getEditor();
 
 			if (cmd.equals("Undo")) {
@@ -130,27 +143,26 @@ public class JviFrame extends JFrame {
 				editor.redoLastAction();
 				return;
 			}
-			
+
 			if (cmd.equals("Repeat")) {
 				Normal.normal_cmd('.', true);
 				return;
 			}
 
 			if (cmd.equals("Cut")) {
-				
+
 				return;
 			}
 
 			if (cmd.equals("Copy")) {
-				
+
 				return;
 			}
 
 			if (cmd.equals("Paste")) {
-				
+
 				return;
 			}
-
 
 		});
 		mb.add(edit);
@@ -158,35 +170,39 @@ public class JviFrame extends JFrame {
 
 		String[] colors = {"Dark", "Light"};
 		JMenu color_scheme = getMenuWithItems("color Scheme", colors, action -> {
-			String target = action.getActionCommand(); 
+			String target = action.getActionCommand();
 			if (target.equals("Dark")) {
-				JviFrame.selected.setDarkMode();
+				//JviFrame.selected.setDarkMode();
+				editors.forEach(editor -> {
+					editor.setDarkMode();
+				});
 			} else if (target.equals("Light")) {
-				JviFrame.selected.setLightMode();
+				editors.forEach(editor -> {
+					editor.setLightMode();
+				});
 			}
 		});
 		edit.add(color_scheme);
 
 		String[] tools_menu_items = {
-			"Jump To This Tag", "Jump Back", "Build Tags File", "_",
-		};
+			"Jump To This Tag", "Jump Back", "Build Tags File", "_",};
 
 		String[] spelling_menu_items = {
 			"Spelling Check On", "Spelling Check Off", "To Next Error", "To Previous Error",
 			"Suggest Corrections"
 		};
-		
+
 		String[] folding_menu_items = {
 			"Enable/Disable Folds", "View Cursor Line", "View Cursor Line Only", "Close More Folds", "Close All Folds",
 			"Open More Folds", "Open All Folds"
 		};
-		
+
 		var tools = getMenuWithItems("Tools", tools_menu_items);
 		mb.add(tools);
-		
+
 		var spelling = getMenuWithItems("Spelling", spelling_menu_items);
 		tools.add(spelling);
-		
+
 		var folding = getMenuWithItems("Folding", folding_menu_items);
 		tools.add(folding);
 
@@ -196,7 +212,7 @@ public class JviFrame extends JFrame {
 
 		var syntax = getMenuWithItems("Syntax", syntax_menu_items, (action) -> {
 			String lang = action.getActionCommand();
-			
+
 			switch (lang) {
 				case "Off": {
 					selected.getEditor().setSyntaxEditingStyle(VideLanguages.TXT.getHighlight());
@@ -222,18 +238,19 @@ public class JviFrame extends JFrame {
 		syntax.add(languages, 0);
 
 		makeBuffersMenu();
+
 	}
 
 	private static void makeBuffersMenu() {
 		String[] buffers_menu_items = {"Refresh Menu", "Delete", "Alternate", "Next", "Previous", "_"};
 		buffers = getMenuWithItems("Buffers", buffers_menu_items, (action) -> {
-			String cmd = action.getActionCommand(); 
+			String cmd = action.getActionCommand();
 			if (cmd.equals("Next")) {
 				selected.nextBuffer();
 				selected.updateEditorFrame();
 				return;
 			}
-			
+
 			if (cmd.equals("Previous")) {
 				selected.previousBuffer();
 				selected.updateEditorFrame();
@@ -241,7 +258,14 @@ public class JviFrame extends JFrame {
 			}
 		});
 		mb.add(buffers);
-		
+		String[] window_items = {
+			"New", "Split", "Split To #", "Split Vertically", "_", "Close", "Close Others", "_",
+			"Move Up", "Move Down"
+		};
+		var window = getMenuWithItems("Window", window_items, action -> {
+		});
+		mb.add(window);
+
 		var _buffers = selected.getBuffers();
 		for (int i = 0; i < _buffers.size(); i++) {
 			var buffer = _buffers.get(i);
@@ -259,25 +283,25 @@ public class JviFrame extends JFrame {
 	}
 
 	private static void putMenuItems(JMenu menu, String[] items) {
-		for (String itm: items) {
+		for (String itm : items) {
 			if (itm.equals("_")) {
 				menu.add(new JSeparator());
 				continue;
 			}
-			
+
 			JMenuItem item = new JMenuItem(itm);
 			menu.add(item);
 		}
 	}
-	
+
 	private static JMenu getMenuWithItems(String name, String[] items) {
 		JMenu menu = new JMenu(name);
-		for (String itm: items) {
+		for (String itm : items) {
 			if (itm.equals("_")) {
 				menu.add(new JSeparator());
 				continue;
 			}
-			
+
 			JMenuItem item = new JMenuItem(itm);
 			menu.add(item);
 		}
@@ -286,24 +310,23 @@ public class JviFrame extends JFrame {
 
 	private static JMenu getMenuWithItems(String name, String[] items, ActionListener l) {
 		JMenu menu = new JMenu(name);
-		for (String itm: items) {
+		for (String itm : items) {
 			if (itm.equals("_")) {
 				menu.add(new JSeparator());
 				continue;
 			}
-			
+
 			JMenuItem item = new JMenuItem(itm);
 			item.addActionListener(l);
 			menu.add(item);
 		}
 		return menu;
 	}
-	
 
 	private void createNodes(DefaultMutableTreeNode top, File fp) {
 		DefaultMutableTreeNode folder = null;
 		DefaultMutableTreeNode filed = null;
-		
+
 		File[] files = fp.listFiles();
 
 		for (File file : files) {
@@ -317,7 +340,6 @@ public class JviFrame extends JFrame {
 			}
 		}
 	}
-
 
 	public static void split(int direction, EditorPanel panel) {
 		if (split_root == null || JviFrame.selected == null) {
@@ -370,7 +392,6 @@ public class JviFrame extends JFrame {
 
 		return leftResult || rightResult;
 	}
-
 
 	public static void unsplitFocused() {
 		if (split_root == null || JviFrame.selected == null) {
@@ -427,8 +448,6 @@ public class JviFrame extends JFrame {
 
 		return leftResult || rightResult;
 	}
-
-	
 
 	//File | Exit action performed
 	public void fileExit_actionPerformed(ActionEvent e) {
