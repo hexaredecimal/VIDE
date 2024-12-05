@@ -53,7 +53,10 @@ public class JviFrame extends JFrame {
 	public static EditorPanel selected = null;
 	private static JMenu buffers = null;
 	private static JFrame self = null;
-	private static JMenuBar mb = new JMenuBar(); 
+	private static JMenuBar mb = new JMenuBar();
+
+	public static ArrayList<EditorPanel> editors = new ArrayList<>();
+
 	//Construct the frame
 	public JviFrame() {
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
@@ -73,15 +76,15 @@ public class JviFrame extends JFrame {
 		this.setTitle("Vide");
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
-		
+
 		split_root.setDividerLocation(0);
 		loadDirectory(System.getProperty("user.dir"));
 		split_root.setLeftComponent(new JScrollPane(file_tree));
-		split_root.setRightComponent(new EditorPanel());
+		split_root.setRightComponent(EditorPanel.emplaceEditor());
 		split_root.setDividerLocation(0);
 		contentPane.add(split_root);
 		setUpMenuBar();
-		this.setJMenuBar(mb); 
+		this.setJMenuBar(mb);
 	}
 
 	private void loadDirectory(String file) {
