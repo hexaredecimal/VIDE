@@ -54,6 +54,7 @@ public class JviFrame extends JFrame {
 	private static JMenu buffers = null;
 	private static JFrame self = null;
 	private static JMenuBar mb = new JMenuBar();
+	public static String color_scheme = "Light";
 
 	public static ArrayList<EditorPanel> editors = new ArrayList<>();
 
