@@ -58,7 +58,6 @@ public class EditorPanel extends JPanel {
 		setupVi();
 	}
 
-
 	public static EditorPanel emplaceEditor() {
 		var editor = new EditorPanel();
 		JviFrame.editors.add(editor);
@@ -139,7 +138,11 @@ public class EditorPanel extends JPanel {
 	}
 
 	public void updateBufferStatus() {
-		this.bufferName.setText(this.buffers.get(this.selectedBuffer).getFile());
+		var buffer = this.buffers.get(this.selectedBuffer);
+		if (buffer.getFile() == null) {
+			this.bufferName.setText("buffer");
+		}
+		this.bufferName.setText(buffer.getFile());
 	}
 
 	public void updateEditorFrame() {
