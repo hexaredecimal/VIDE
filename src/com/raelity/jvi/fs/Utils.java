@@ -122,6 +122,7 @@ public class Utils {
 			var text = contents.unwrap();
 			buffer.setText(text);
 		}
+
 		JviFrame.selected.updateEditorFrame();
 		JviFrame.updateOpenBuffers();
 	}
