@@ -344,6 +344,19 @@ public class JviFrame extends JFrame {
 		}
 	}
 
+	private static void putMenuItems(JMenu menu, String[] items, ActionListener l) {
+		for (String itm : items) {
+			if (itm.equals("_")) {
+				menu.add(new JSeparator());
+				continue;
+			}
+
+			JMenuItem item = new JMenuItem(itm);
+			item.addActionListener(l);
+			menu.add(item);
+		}
+	}
+
 	private static JMenu getMenuWithItems(String name, String[] items) {
 		JMenu menu = new JMenu(name);
 		for (String itm : items) {
