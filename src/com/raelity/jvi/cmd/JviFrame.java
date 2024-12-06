@@ -175,6 +175,7 @@ public class JviFrame extends JFrame {
 		String[] colors = {"Dark", "Light"};
 		JMenu color_scheme = getMenuWithItems("color Scheme", colors, action -> {
 			String target = action.getActionCommand();
+			JviFrame.color_scheme = target;
 			if (target.equals("Dark")) {
 				//JviFrame.selected.setDarkMode();
 				editors.forEach(editor -> {
