@@ -292,13 +292,13 @@ public class EditorPanel extends JPanel {
 				int line = editorPane.getLineOfOffset(caretPos) + 1; // Line numbers are 0-based
 				int column = caretPos - editorPane.getLineStartOffset(line - 1) + 1; // Column is 0-based
 				int lines_count = editorPane.getLineCount();
-				int percent_lines = (int) (((double)line / (double) lines_count) *100); 
-				String msg = ""; 
+				int percent_lines = (int) (((double) line / (double) lines_count) * 100);
+				String msg = "";
 				if (line == 1) {
 					msg = "Top";
-				} else if (percent_lines == 100){
+				} else if (percent_lines == 100) {
 					msg = "Bot";
-				} 
+				}
 				generalStatusBar.setText(String.format("%s %d%%  ln: %d/%d cn: %d", msg, percent_lines, line, lines_count, column));
 			} catch (Exception ex) {
 				ex.printStackTrace();
