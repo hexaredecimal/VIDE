@@ -151,7 +151,7 @@ public class EditorPanel extends JPanel {
 		this.editorPane.setText(this.currentBuffer().getText());
 	}
 
-	private void setSyntaxFromBufferName() {
+	public void setSyntaxFromBufferName() {
 		String buffer = this.buffers.get(this.selectedBuffer).getFile();
 		if (buffer == null) {
 			editorPane.setSyntaxEditingStyle(VideLanguages.fromFileType("txt").getHighlight());
