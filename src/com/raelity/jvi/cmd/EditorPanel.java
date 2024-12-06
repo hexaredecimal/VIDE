@@ -69,10 +69,34 @@ public class EditorPanel extends JPanel {
 		return editorPane;
 	}
 
+	public void removeSelectedBuffer() {
+		int buffers_size = this.buffers.size();
+		if (buffers_size == 0) {
+			return;
+		}
+
+		buffers.remove(selectedBuffer);
+		buffers_size = this.buffers.size();
+		if (buffers_size == 0) {
+			editorPane.setText("");
+			buffers.add(new EditorBuffer(null, ""));
+			bufferName.setText("buffer");
+		} else {
+			previousBuffer();
+			updateEditorFrame();
+		}
+	}
+
 	public ArrayList<EditorBuffer> getBuffers() {
 		return buffers;
 	}
 
+	public void selectBufferByIndex(int index) {
+		int buffers_size = this.buffers.size();
+		if (index >= buffers_size) 
+			selectedBuffer = buffers_size - 1;
+		selectedBuffer = index; 
+	}
 	public void nextBuffer() {
 		int buffers_size = this.buffers.size();
 		selectedBuffer = ++selectedBuffer % buffers_size;
