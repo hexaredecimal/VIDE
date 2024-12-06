@@ -218,8 +218,13 @@ public class JviFrame extends JFrame {
 		var syntax = getMenuWithItems("Syntax", syntax_menu_items, (action) -> {
 			String lang = action.getActionCommand();
 
-			switch (lang) {
-				case "Off": {
+			if (lang.equals("Off")) {
+					selected.getEditor().setSyntaxEditingStyle(VideLanguages.TXT.getHighlight());
+			} else if (lang.equals("On/Off for this file")) {
+				var lighlight = selected.getEditor().getSyntaxEditingStyle();
+				if (lighlight.equals(VideLanguages.TXT.getHighlight())) {
+					selected.setSyntaxFromBufferName();
+				} else {
 					selected.getEditor().setSyntaxEditingStyle(VideLanguages.TXT.getHighlight());
 				}
 			}
