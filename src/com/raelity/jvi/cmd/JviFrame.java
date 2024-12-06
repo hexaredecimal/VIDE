@@ -154,17 +154,17 @@ public class JviFrame extends JFrame {
 			}
 
 			if (cmd.equals("Cut")) {
-
+				editor.cut();
 				return;
 			}
 
 			if (cmd.equals("Copy")) {
-
+				editor.copy();
 				return;
 			}
 
 			if (cmd.equals("Paste")) {
-
+				editor.paste();
 				return;
 			}
 
