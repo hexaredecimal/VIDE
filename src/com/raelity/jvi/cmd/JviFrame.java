@@ -249,11 +249,40 @@ public class JviFrame extends JFrame {
 
 		makeBuffersMenu();
 
+		String[] window_items = {
+			"New", "Split", "Split To #", "Split Vertically", "_", "Close", "Close Others", "_",
+			"Move Up", "Move Down"
+		};
+		var window = getMenuWithItems("Window", window_items, action -> {
+			String cmd = action.getActionCommand();
+			if (cmd.equals("New")) {
+				split(JSplitPane.HORIZONTAL_SPLIT, EditorPanel.emplaceEditor());
+			} else if (cmd.equals("Split")) {
+				split(JSplitPane.HORIZONTAL_SPLIT, EditorPanel.emplaceEditor());
+			} else if (cmd.equals("Split To #")) {
+				double rand = Math.random(); // TODO: Split using the users direction
+				int side = rand > 1/2 ? JSplitPane.VERTICAL_SPLIT : JSplitPane.HORIZONTAL_SPLIT;
+				split(side, EditorPanel.emplaceEditor());
+			} else if (cmd.equals("Split Vertically")) {
+				split(JSplitPane.VERTICAL_SPLIT, EditorPanel.emplaceEditor());
+			} else if (cmd.equals("Close")) {
+				JviFrame.unsplitFocused();
+			}
+		});
+		mb.add(window);
+
+		String[] help_items = {
+			"Overview", "User Manual", "How-To-Links", "Find", "_", "Credits", "Copying", "_", 
+			"Version", "About"
+		};
+		
+		var help = getMenuWithItems("Help", help_items);
+		mb.add(help);
 	}
 
 	private static void makeBuffersMenu() {
 		String[] buffers_menu_items = {"Refresh Menu", "Delete", "Alternate", "Next", "Previous", "_"};
-		buffers = getMenuWithItems("Buffers", buffers_menu_items, (action) -> {
+		ActionListener action_l = (action) -> {
 			String cmd = action.getActionCommand();
 			if (cmd.equals("Next")) {
 				selected.nextBuffer();
