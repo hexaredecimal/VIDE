@@ -226,7 +226,11 @@ public class EditorPanel extends JPanel {
 
 		ViManager.installKeymap(editorPane);
 		//setDarkMode();
-		setLightMode();
+		if (JviFrame.color_scheme.equals("Dark")) {
+			setDarkMode();
+		} else if (JviFrame.color_scheme.equals("Light")) {
+			setLightMode();
+		}
 
 		// Wrap it in an RTextScrollPane to enable line numbers
 		editor_scroll = new RTextScrollPane(editorPane);
