@@ -295,27 +295,38 @@ public class JviFrame extends JFrame {
 				selected.updateEditorFrame();
 				return;
 			}
-		});
-		mb.add(buffers);
-		String[] window_items = {
-			"New", "Split", "Split To #", "Split Vertically", "_", "Close", "Close Others", "_",
-			"Move Up", "Move Down"
+
+			if (cmd.equals("Delete")) {
+				selected.removeSelectedBuffer();
+				selected.updateEditorFrame();
+			}
 		};
-		var window = getMenuWithItems("Window", window_items, action -> {
-		});
-		mb.add(window);
+
+		if (buffers == null) {
+			buffers = getMenuWithItems("Buffers", buffers_menu_items, action_l);
+			mb.add(buffers);
+		} else {
+			buffers.removeAll();
+			putMenuItems(buffers, buffers_menu_items, action_l);
+		}
 
 		var _buffers = selected.getBuffers();
 		for (int i = 0; i < _buffers.size(); i++) {
 			var buffer = _buffers.get(i);
 			var name = buffer.getFile();
 			JMenuItem item = new JMenuItem(String.format("[%s] (%d)", name == null ? "No name" : name, i + 1));
+			if (name != null) {
+				item.addActionListener(action -> {
+					int index = _buffers.indexOf(buffer);
+					selected.selectBufferByIndex(index);
+					selected.updateEditorFrame();
+				});
+			}
 			buffers.add(item);
 		}
 	}
 
 	public static void updateOpenBuffers() {
-		mb.remove(buffers);
 		makeBuffersMenu();
 		mb.revalidate();
 		mb.repaint();
